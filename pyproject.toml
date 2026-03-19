@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "interview"
 version = "0.1.0"
@@ -17,4 +21,8 @@ dependencies = [
 ]
 
 [project.scripts]
-interview = "app.cli:main"
+interview = "interview:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["interview", "cli", "common", "data", "deps", "prediction", "training"]
