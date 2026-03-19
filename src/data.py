@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 from uuid import uuid4
 
-from .common import (
+from common import (
     ALL_VARIANTS,
     DEFAULT_S5MARS_REPO_ID,
     IMAGE_MEAN,
@@ -16,7 +16,7 @@ from .common import (
     S5MARS_CLASS_NAME_TO_ID,
     S5MARS_MASK_TARGETS,
 )
-from .deps import Dataset, cv2, ensure_fiftyone, ensure_torch, np, torch
+from deps import Dataset, cv2, ensure_fiftyone, ensure_torch, np, torch
 
 SUPPORTED_IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff")
 

@@ -7,9 +7,9 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from .common import DEFAULT_VARIANTS, IMAGE_MEAN, IMAGE_STD, TrainMetrics
-from .data import MarsRockDataset, collect_image_label_pairs, load_hub_dataset
-from .deps import DataLoader, F, cv2, deeplabv3_mobilenet_v3_large, ensure_torch, np, torch, lraspp_mobilenet_v3_large
+from common import DEFAULT_VARIANTS, IMAGE_MEAN, IMAGE_STD, TrainMetrics
+from data import MarsRockDataset, collect_image_label_pairs, load_hub_dataset
+from deps import DataLoader, F, cv2, deeplabv3_mobilenet_v3_large, ensure_torch, np, torch, lraspp_mobilenet_v3_large
 
 DEFAULT_MODEL_NAME = "deeplabv3_mobilenet_v3_large"
 

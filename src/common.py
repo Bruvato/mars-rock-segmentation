@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from .deps import cv2, np
+from deps import cv2, np
 
 Point = Tuple[float, float]
 

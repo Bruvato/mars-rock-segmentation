@@ -2,18 +2,39 @@
 
 This project trains and runs a binary rock-segmentation pipeline for Mars rover imagery.
 
-The Hugging Face asset referenced in the prompt, [`Voxel51/S5Mars`](https://huggingface.co/datasets/Voxel51/S5Mars), is a dataset rather than a pretrained model. The codebase now includes a `prepare-s5mars` command that downloads it through FiftyOne and converts the `rock` class into the local `img/{split}` and `label/{split}` layout that the trainer already understands.
+The Hugging Face asset referenced in the prompt, [`Voxel51/S5Mars`](https://huggingface.co/datasets/Voxel51/S5Mars), is a dataset rather than a pretrained model. The codebase includes a `prepare-s5mars` command that downloads it through FiftyOne and converts the `rock` class into the local `img/{split}` and `label/{split}` layout that the trainer already understands.
+
+## Project Layout
+
+```text
+.
+├── pyproject.toml
+├── README.md
+├── src/
+│   ├── interview.py
+│   ├── cli.py
+│   ├── prediction.py
+│   └── ...
+├── inputs/
+├── models/
+└── outputs/
+```
 
 ## Quick Start
 
+Install the locked environment and confirm the CLI is available:
+
 ```bash
 uv sync
+uv run interview --help
 ```
 
-Run inference with the existing checkpoint:
+## Run Inference
+
+Run inference with an existing checkpoint:
 
 ```bash
-.venv/bin/python main.py predict --input inputs/input1.png --checkpoint models/s5mars_long.pt
+uv run interview predict --input inputs/input1.png --checkpoint models/s5mars_long.pt
 ```
 
 The `predict` command writes four artifacts by default:
@@ -26,7 +47,7 @@ The `predict` command writes four artifacts by default:
 You can improve the single-image height heuristic when camera metadata is known:
 
 ```bash
-.venv/bin/python main.py predict \
+uv run interview predict \
   --input inputs/input1.png \
   --checkpoint models/s5mars_long.pt \
   --camera-height-m 1.8 \
@@ -35,27 +56,28 @@ You can improve the single-image height heuristic when camera metadata is known:
   --min-height-cm 10
 ```
 
+If you prefer the module form, this is equivalent:
+
+```bash
+uv run python -m interview predict --input inputs/input1.png --checkpoint models/s5mars_long.pt
+```
+
+## Training
+
 Train on the existing local dataset:
 
 ```bash
-.venv/bin/python main.py train --dataset-root MarsData
+uv run interview train --dataset-root MarsData
 ```
 
 Prepare `S5Mars` from Hugging Face and train on it:
 
 ```bash
-.venv/bin/python main.py prepare-s5mars --output-root data/s5mars_rock
-.venv/bin/python main.py train --dataset-root data/s5mars_rock --target-class rock --image-size 512
+uv run interview prepare-s5mars --output-root data/s5mars_rock
+uv run interview train --dataset-root data/s5mars_rock --target-class rock --image-size 512
 ```
 
 ## Commands
 
 - `predict`: run the binary rock detector and write an annotated image, binary mask, JSON payload, and a separate `>10 cm` outline image
-- `train`: train the LR-ASPP model on a local `img/` and `label/` dataset root
-- `prepare-s5mars`: download `Voxel51/S5Mars` with FiftyOne and export a binary `rock` mask dataset for training
-
-## Notes
-
-- The legacy `MarsData` variant filter still works for filenames ending in `raw`, `warp`, `sup`, `sdown`, `tleft`, or `tup`.
-- Prepared S5Mars exports are non-variant datasets, so they bypass variant filtering automatically.
-- `--target-class` accepts either a class name like `rock` or a numeric S5Mars class id.
+- `train`: train the segmenter on a local `img/` and `label/` dataset root

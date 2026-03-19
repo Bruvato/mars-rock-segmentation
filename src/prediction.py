@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from .common import (
+from common import (
     CameraModel,
     RockDetection,
     clamp,
@@ -16,9 +16,9 @@ from .common import (
     normalize_uint8,
     robust_normalize_map,
 )
-from .data import image_to_tensor
-from .deps import cv2, ndi, ensure_torch, np, remove_small_holes, remove_small_objects, torch, watershed
-from .training import choose_device, load_checkpoint_model, model_logits
+from data import image_to_tensor
+from deps import cv2, ndi, ensure_torch, np, remove_small_holes, remove_small_objects, torch, watershed
+from training import choose_device, load_checkpoint_model, model_logits
 
 
 def resolve_checkpoint_path(checkpoint_path: Path) -> Path:

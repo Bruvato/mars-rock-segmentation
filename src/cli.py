@@ -7,19 +7,18 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 
-from .common import DEFAULT_S5MARS_REPO_ID, DEFAULT_VARIANTS
-from .data import prepare_s5mars_dataset
-from .prediction import default_output_paths, predict_image
-from .training import train_model
+from common import DEFAULT_S5MARS_REPO_ID, DEFAULT_VARIANTS
+from data import prepare_s5mars_dataset
+from prediction import default_output_paths, predict_image
+from training import train_model
 
 
 def _dotenv_candidates() -> Sequence[Path]:
-    package_dir = Path(__file__).resolve().parent
-    project_root = package_dir.parent
+    source_root = Path(__file__).resolve().parent
+    project_root = source_root.parent
     return (
         Path.cwd() / ".env",
         project_root / ".env",
-        package_dir / ".env",
     )
 
 
@@ -225,7 +224,7 @@ def add_prepare_s5mars_parser(subparsers: argparse._SubParsersAction[argparse.Ar
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     effective_argv = list(sys.argv[1:] if argv is None else argv)
     known_commands = {"train", "predict", "prepare-s5mars"}
-    if effective_argv and effective_argv[0] not in known_commands:
+    if effective_argv and effective_argv[0] not in known_commands and not effective_argv[0].startswith("-"):
         effective_argv = ["predict", *effective_argv]
 
     parser = argparse.ArgumentParser(
