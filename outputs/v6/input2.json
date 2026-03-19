@@ -1,0 +1,914 @@
+{
+  "image": "inputs/input2.png",
+  "mask_image": "outputs/input2_mask.png",
+  "height_filtered_image": "outputs/input2_rocks_over_10cm.png",
+  "threshold_probability": 0.55,
+  "height_filter_cm": 10.0,
+  "model": {
+    "checkpoint": "models/s5mars_long_v2.pt",
+    "model_name": "deeplabv3_mobilenet_v3_large",
+    "epoch": 10,
+    "val_metrics": {
+      "loss": 0.4354178994894028,
+      "dice": 0.24494698544922172,
+      "iou": 0.15539363063933345
+    },
+    "config": {
+      "model_name": "deeplabv3_mobilenet_v3_large",
+      "dataset_root": "MarsData",
+      "hf_repo_id": "Voxel51/S5Mars",
+      "hf_label_field": "ground_truth",
+      "hf_max_samples": 2000,
+      "variants": [
+        "raw",
+        "warp",
+        "sup",
+        "sdown",
+        "tleft",
+        "tup"
+      ],
+      "target_class": "rock",
+      "image_size": 320,
+      "crop_size": 320,
+      "patches_per_image": 4,
+      "positive_crop_probability": 0.9,
+      "epochs": 20,
+      "batch_size": 4,
+      "lr": 0.001,
+      "weight_decay": 0.0001,
+      "seed": 7
+    }
+  },
+  "camera": {
+    "width": 800,
+    "height": 601,
+    "camera_height_m": 2.0,
+    "vfov_deg": 45.0,
+    "pitch_deg": 35.0,
+    "auto_estimated": false,
+    "horizon_row": null,
+    "pitch_source": "fallback",
+    "vfov_source": "fallback",
+    "camera_height_source": "fallback"
+  },
+  "segmentation_summary": {
+    "instances": 13,
+    "selected_instances": 13,
+    "height_filtered_instances": 8,
+    "foreground_pixels": 18456,
+    "valid_pixels": 480800,
+    "foreground_ratio": 0.038386
+  },
+  "rocks": [
+    {
+      "id": 1,
+      "bbox": [
+        292,
+        140,
+        39,
+        26
+      ],
+      "centroid": [
+        310.39,
+        152.55
+      ],
+      "confidence": 0.553,
+      "area_px": 757.0,
+      "mean_probability": 0.4727,
+      "mean_score": 0.3411,
+      "peak_score": 0.5473,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 27.24,
+      "estimated_height_cm": 21.63,
+      "estimated_distance_m": 4.471,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          292,
+          151
+        ],
+        [
+          293,
+          160
+        ],
+        [
+          300,
+          165
+        ],
+        [
+          314,
+          165
+        ],
+        [
+          327,
+          159
+        ],
+        [
+          329,
+          157
+        ],
+        [
+          330,
+          149
+        ],
+        [
+          328,
+          144
+        ],
+        [
+          307,
+          140
+        ],
+        [
+          296,
+          143
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "bbox": [
+        337,
+        245,
+        93,
+        75
+      ],
+      "centroid": [
+        379.23,
+        280.15
+      ],
+      "confidence": 0.733,
+      "area_px": 4780.5,
+      "mean_probability": 0.7979,
+      "mean_score": 0.4464,
+      "peak_score": 0.6671,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 46.11,
+      "estimated_height_cm": 39.46,
+      "estimated_distance_m": 2.745,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          358,
+          246
+        ],
+        [
+          341,
+          269
+        ],
+        [
+          337,
+          289
+        ],
+        [
+          343,
+          303
+        ],
+        [
+          375,
+          319
+        ],
+        [
+          398,
+          312
+        ],
+        [
+          429,
+          270
+        ],
+        [
+          398,
+          247
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "bbox": [
+        87,
+        398,
+        39,
+        38
+      ],
+      "centroid": [
+        106.8,
+        417.11
+      ],
+      "confidence": 0.603,
+      "area_px": 979.5,
+      "mean_probability": 0.5587,
+      "mean_score": 0.4004,
+      "peak_score": 0.5877,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 15.75,
+      "estimated_height_cm": 14.65,
+      "estimated_distance_m": 2.258,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          104,
+          398
+        ],
+        [
+          87,
+          415
+        ],
+        [
+          88,
+          423
+        ],
+        [
+          102,
+          435
+        ],
+        [
+          119,
+          431
+        ],
+        [
+          125,
+          422
+        ],
+        [
+          125,
+          414
+        ],
+        [
+          120,
+          404
+        ]
+      ]
+    },
+    {
+      "id": 4,
+      "bbox": [
+        479,
+        406,
+        75,
+        54
+      ],
+      "centroid": [
+        518.5,
+        430.97
+      ],
+      "confidence": 0.559,
+      "area_px": 2524.5,
+      "mean_probability": 0.5181,
+      "mean_score": 0.3375,
+      "peak_score": 0.537,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 30.3,
+      "estimated_height_cm": 23.22,
+      "estimated_distance_m": 1.918,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          479,
+          417
+        ],
+        [
+          488,
+          434
+        ],
+        [
+          512,
+          445
+        ],
+        [
+          514,
+          456
+        ],
+        [
+          535,
+          459
+        ],
+        [
+          552,
+          449
+        ],
+        [
+          553,
+          440
+        ],
+        [
+          546,
+          423
+        ],
+        [
+          520,
+          407
+        ],
+        [
+          504,
+          410
+        ],
+        [
+          488,
+          406
+        ]
+      ]
+    },
+    {
+      "id": 5,
+      "bbox": [
+        305,
+        447,
+        60,
+        62
+      ],
+      "centroid": [
+        334.46,
+        477.36
+      ],
+      "confidence": 0.646,
+      "area_px": 2460.5,
+      "mean_probability": 0.6301,
+      "mean_score": 0.3974,
+      "peak_score": 0.6494,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 22.54,
+      "estimated_height_cm": 20.83,
+      "estimated_distance_m": 1.653,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          339,
+          447
+        ],
+        [
+          320,
+          452
+        ],
+        [
+          311,
+          465
+        ],
+        [
+          308,
+          483
+        ],
+        [
+          305,
+          485
+        ],
+        [
+          311,
+          496
+        ],
+        [
+          320,
+          500
+        ],
+        [
+          326,
+          508
+        ],
+        [
+          345,
+          504
+        ],
+        [
+          364,
+          483
+        ],
+        [
+          364,
+          476
+        ],
+        [
+          358,
+          464
+        ],
+        [
+          345,
+          449
+        ]
+      ]
+    },
+    {
+      "id": 6,
+      "bbox": [
+        639,
+        463,
+        42,
+        56
+      ],
+      "centroid": [
+        656.99,
+        493.65
+      ],
+      "confidence": 0.611,
+      "area_px": 1482.0,
+      "mean_probability": 0.665,
+      "mean_score": 0.367,
+      "peak_score": 0.4816,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 20.15,
+      "estimated_height_cm": 15.74,
+      "estimated_distance_m": 1.812,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          649,
+          463
+        ],
+        [
+          644,
+          471
+        ],
+        [
+          639,
+          490
+        ],
+        [
+          639,
+          499
+        ],
+        [
+          643,
+          506
+        ],
+        [
+          642,
+          512
+        ],
+        [
+          647,
+          516
+        ],
+        [
+          659,
+          518
+        ],
+        [
+          675,
+          516
+        ],
+        [
+          680,
+          512
+        ],
+        [
+          677,
+          509
+        ],
+        [
+          679,
+          499
+        ],
+        [
+          664,
+          490
+        ],
+        [
+          664,
+          464
+        ]
+      ]
+    },
+    {
+      "id": 7,
+      "bbox": [
+        413,
+        474,
+        46,
+        34
+      ],
+      "centroid": [
+        435.61,
+        489.7
+      ],
+      "confidence": 0.626,
+      "area_px": 1050.0,
+      "mean_probability": 0.6331,
+      "mean_score": 0.3737,
+      "peak_score": 0.5642,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 16.72,
+      "estimated_height_cm": 13.56,
+      "estimated_distance_m": 1.641,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          424,
+          475
+        ],
+        [
+          413,
+          488
+        ],
+        [
+          414,
+          496
+        ],
+        [
+          416,
+          498
+        ],
+        [
+          431,
+          503
+        ],
+        [
+          437,
+          507
+        ],
+        [
+          442,
+          507
+        ],
+        [
+          449,
+          500
+        ],
+        [
+          456,
+          497
+        ],
+        [
+          458,
+          487
+        ],
+        [
+          453,
+          480
+        ],
+        [
+          440,
+          474
+        ]
+      ]
+    },
+    {
+      "id": 8,
+      "bbox": [
+        227,
+        529,
+        10,
+        10
+      ],
+      "centroid": [
+        231.55,
+        533.62
+      ],
+      "confidence": 0.462,
+      "area_px": 57.0,
+      "mean_probability": 0.2985,
+      "mean_score": 0.4001,
+      "peak_score": 0.482,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 3.47,
+      "estimated_height_cm": 3.21,
+      "estimated_distance_m": 1.6,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": false,
+      "contour": [
+        [
+          232,
+          529
+        ],
+        [
+          227,
+          532
+        ],
+        [
+          227,
+          535
+        ],
+        [
+          231,
+          538
+        ],
+        [
+          236,
+          535
+        ],
+        [
+          236,
+          532
+        ]
+      ]
+    },
+    {
+      "id": 9,
+      "bbox": [
+        226,
+        540,
+        13,
+        11
+      ],
+      "centroid": [
+        231.99,
+        545.67
+      ],
+      "confidence": 0.441,
+      "area_px": 76.0,
+      "mean_probability": 0.2507,
+      "mean_score": 0.4094,
+      "peak_score": 0.4836,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 4.44,
+      "estimated_height_cm": 3.73,
+      "estimated_distance_m": 1.554,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": false,
+      "contour": [
+        [
+          231,
+          540
+        ],
+        [
+          226,
+          547
+        ],
+        [
+          232,
+          550
+        ],
+        [
+          236,
+          550
+        ],
+        [
+          238,
+          547
+        ]
+      ]
+    },
+    {
+      "id": 10,
+      "bbox": [
+        221,
+        556,
+        45,
+        31
+      ],
+      "centroid": [
+        237.13,
+        571.64
+      ],
+      "confidence": 0.416,
+      "area_px": 553.5,
+      "mean_probability": 0.3131,
+      "mean_score": 0.3935,
+      "peak_score": 0.5218,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 14.72,
+      "estimated_height_cm": 9.59,
+      "estimated_distance_m": 1.423,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": false,
+      "contour": [
+        [
+          221,
+          580
+        ],
+        [
+          228,
+          585
+        ],
+        [
+          243,
+          586
+        ],
+        [
+          245,
+          582
+        ],
+        [
+          239,
+          579
+        ],
+        [
+          242,
+          575
+        ],
+        [
+          241,
+          569
+        ],
+        [
+          263,
+          571
+        ],
+        [
+          265,
+          567
+        ],
+        [
+          239,
+          562
+        ],
+        [
+          227,
+          556
+        ],
+        [
+          224,
+          562
+        ],
+        [
+          232,
+          569
+        ],
+        [
+          229,
+          571
+        ],
+        [
+          225,
+          569
+        ]
+      ]
+    },
+    {
+      "id": 11,
+      "bbox": [
+        31,
+        560,
+        79,
+        41
+      ],
+      "centroid": [
+        70.91,
+        583.62
+      ],
+      "confidence": 0.549,
+      "area_px": 2399.5,
+      "mean_probability": 0.4387,
+      "mean_score": 0.3744,
+      "peak_score": 0.6179,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 26.74,
+      "estimated_height_cm": 17.13,
+      "estimated_distance_m": 1.693,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": true,
+      "contour": [
+        [
+          31,
+          593
+        ],
+        [
+          31,
+          600
+        ],
+        [
+          109,
+          600
+        ],
+        [
+          109,
+          583
+        ],
+        [
+          97,
+          561
+        ],
+        [
+          85,
+          568
+        ],
+        [
+          73,
+          567
+        ],
+        [
+          69,
+          570
+        ],
+        [
+          48,
+          560
+        ],
+        [
+          43,
+          563
+        ],
+        [
+          43,
+          572
+        ]
+      ]
+    },
+    {
+      "id": 12,
+      "bbox": [
+        426,
+        583,
+        25,
+        18
+      ],
+      "centroid": [
+        440.84,
+        593.32
+      ],
+      "confidence": 0.504,
+      "area_px": 269.5,
+      "mean_probability": 0.4088,
+      "mean_score": 0.3272,
+      "peak_score": 0.5131,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 8.46,
+      "estimated_height_cm": 6.08,
+      "estimated_distance_m": 1.278,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": false,
+      "contour": [
+        [
+          450,
+          585
+        ],
+        [
+          445,
+          583
+        ],
+        [
+          435,
+          588
+        ],
+        [
+          434,
+          593
+        ],
+        [
+          428,
+          596
+        ],
+        [
+          426,
+          600
+        ],
+        [
+          450,
+          600
+        ]
+      ]
+    },
+    {
+      "id": 13,
+      "bbox": [
+        424,
+        570,
+        21,
+        20
+      ],
+      "centroid": [
+        434.75,
+        579.92
+      ],
+      "confidence": 0.506,
+      "area_px": 260.0,
+      "mean_probability": 0.4364,
+      "mean_score": 0.3349,
+      "peak_score": 0.4457,
+      "passes_threshold": true,
+      "estimated_visible_span_cm": 7.71,
+      "estimated_height_cm": 6.46,
+      "estimated_distance_m": 1.321,
+      "size_estimate_method": "ground_scale_shape_heuristic",
+      "passes_height_filter": false,
+      "contour": [
+        [
+          444,
+          573
+        ],
+        [
+          440,
+          570
+        ],
+        [
+          432,
+          573
+        ],
+        [
+          426,
+          578
+        ],
+        [
+          424,
+          586
+        ],
+        [
+          429,
+          589
+        ],
+        [
+          433,
+          589
+        ],
+        [
+          443,
+          584
+        ]
+      ]
+    }
+  ]
+}

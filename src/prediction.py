@@ -374,31 +374,185 @@ def postprocess_probability_map(
             continue
         filtered |= component
 
+    filtered = expand_components_by_probability(
+        filtered.astype(bool),
+        probability_map=probability_map,
+        score_map=score_map,
+        valid_mask=valid_mask,
+    )
     filtered = cv2.morphologyEx(filtered.astype(np.uint8), cv2.MORPH_CLOSE, ellipse_kernel(5)) > 0
-    filtered = remove_small_holes(filtered, area_threshold=96)
+    filtered = ndi.binary_fill_holes(filtered)
+    filtered = cv2.morphologyEx(filtered.astype(np.uint8), cv2.MORPH_OPEN, ellipse_kernel(3)) > 0
+    filtered = remove_small_objects(filtered, min_size=min_component_size)
+    filtered = remove_small_holes(filtered, area_threshold=max(96, min_component_size * 2))
     filtered &= valid_mask
     return filtered.astype(bool), score_map
+
+
+def component_bbox(component_mask: np.ndarray) -> Tuple[int, int, int, int]:
+    ys, xs = np.where(component_mask)
+    if ys.size == 0 or xs.size == 0:
+        return 0, 0, 0, 0
+    return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+
+
+def grow_component_support(
+    component_mask: np.ndarray,
+    probability_map: np.ndarray,
+    score_map: np.ndarray,
+    valid_mask: np.ndarray,
+) -> np.ndarray:
+    area = int(component_mask.sum())
+    if area < 18:
+        return component_mask.astype(bool)
+
+    left, top, right, bottom = component_bbox(component_mask)
+    if right <= left or bottom <= top:
+        return component_mask.astype(bool)
+
+    width = right - left
+    height = bottom - top
+    pad = int(clamp(0.32 * max(width, height), 10, 80))
+    left = max(0, left - pad)
+    top = max(0, top - pad)
+    right = min(component_mask.shape[1], right + pad)
+    bottom = min(component_mask.shape[0], bottom + pad)
+
+    local_seed = component_mask[top:bottom, left:right].astype(bool)
+    local_probability = probability_map[top:bottom, left:right]
+    local_score = score_map[top:bottom, left:right]
+    local_valid = valid_mask[top:bottom, left:right].astype(bool)
+
+    seed_probability = local_probability[local_seed]
+    seed_score = local_score[local_seed]
+    if seed_probability.size == 0 or seed_score.size == 0:
+        return component_mask.astype(bool)
+
+    probability_cutoff = clamp(float(np.percentile(seed_probability, 15.0)) - 0.12, 0.40, 0.62)
+    score_cutoff = clamp(float(np.percentile(seed_score, 10.0)) - 0.08, 0.18, 0.50)
+    distance_limit = int(clamp(math.sqrt(area) * 0.45, 10.0, 72.0))
+    reachable = ndi.distance_transform_edt(~local_seed) <= distance_limit
+    support = (
+        local_valid
+        & reachable
+        & (
+            (local_probability >= probability_cutoff)
+            | ((local_probability >= probability_cutoff - 0.05) & (local_score >= score_cutoff))
+        )
+    )
+    expanded = ndi.binary_propagation(local_seed, mask=support)
+    expanded = cv2.morphologyEx(expanded.astype(np.uint8), cv2.MORPH_CLOSE, ellipse_kernel(5)) > 0
+    expanded = ndi.binary_fill_holes(expanded)
+    expanded = remove_small_holes(expanded, area_threshold=max(64, area // 3))
+
+    grown = np.zeros_like(component_mask, dtype=bool)
+    grown[top:bottom, left:right] = expanded
+    return grown
+
+
+def expand_components_by_probability(
+    binary_mask: np.ndarray,
+    probability_map: np.ndarray,
+    score_map: np.ndarray,
+    valid_mask: np.ndarray,
+) -> np.ndarray:
+    labels, component_count = ndi.label(binary_mask)
+    expanded = np.zeros_like(binary_mask, dtype=bool)
+    for label in range(1, component_count + 1):
+        component = labels == label
+        if not np.any(component):
+            continue
+        expanded |= grow_component_support(component, probability_map, score_map, valid_mask)
+    expanded &= valid_mask
+    return expanded.astype(bool)
+
+
+def compute_component_distance_map(component_mask: np.ndarray) -> np.ndarray:
+    area = int(component_mask.sum())
+    sigma = clamp(math.sqrt(max(area, 1)) / 72.0, 1.0, 2.4)
+    distance = ndi.distance_transform_edt(component_mask)
+    return ndi.gaussian_filter(distance, sigma=sigma)
+
+
+def select_component_markers(component_mask: np.ndarray, distance_map: np.ndarray) -> List[Tuple[int, int]]:
+    area = int(component_mask.sum())
+    if area < 220:
+        return []
+
+    max_distance = float(distance_map[component_mask].max()) if np.any(component_mask) else 0.0
+    if max_distance < 6.5:
+        return []
+
+    max_filter_radius = max(9, int(round(max_distance * 0.55)))
+    max_filter_size = max_filter_radius * 2 + 1
+    maxima = distance_map == ndi.maximum_filter(distance_map, size=max_filter_size)
+    peak_floor = max(4.0, 0.45 * max_distance)
+    peak_coords = np.argwhere(maxima & component_mask & (distance_map >= peak_floor))
+    if peak_coords.shape[0] <= 1:
+        return []
+
+    peak_values = distance_map[peak_coords[:, 0], peak_coords[:, 1]]
+    ordering = np.argsort(peak_values)[::-1]
+    min_peak_distance = max(18.0, max_distance * 1.1, math.sqrt(area) * 0.16)
+    max_markers = min(len(ordering), max(2, int(round(area / 9000.0)) + 2))
+    selected: List[Tuple[int, int]] = []
+    for peak_index in ordering:
+        y, x = peak_coords[peak_index]
+        if any(math.hypot(float(y - py), float(x - px)) < min_peak_distance for py, px in selected):
+            continue
+        selected.append((int(y), int(x)))
+        if len(selected) >= max_markers:
+            break
+    return selected if len(selected) > 1 else []
 
 
 def split_instances(binary_mask: np.ndarray) -> np.ndarray:
     if not np.any(binary_mask):
         return np.zeros(binary_mask.shape, dtype=np.int32)
-    distance = ndi.distance_transform_edt(binary_mask)
-    distance = ndi.gaussian_filter(distance, sigma=1.0)
-    maxima = distance == ndi.maximum_filter(distance, size=19)
-    maxima &= binary_mask & (distance > 3.0)
-    markers, marker_count = ndi.label(maxima)
-    if marker_count == 0:
-        markers, _ = ndi.label(binary_mask)
-    labels = watershed(-distance, markers, mask=binary_mask)
-    output = np.zeros_like(labels, dtype=np.int32)
+
+    component_labels, component_count = ndi.label(binary_mask)
+    output = np.zeros(binary_mask.shape, dtype=np.int32)
     next_label = 1
-    for label in range(1, int(labels.max()) + 1):
-        component = labels == label
+
+    for component_id in range(1, component_count + 1):
+        component = component_labels == component_id
         if component.sum() < 24:
             continue
-        output[component] = next_label
-        next_label += 1
+        component = ndi.binary_fill_holes(component)
+        distance = compute_component_distance_map(component)
+        marker_points = select_component_markers(component, distance)
+        if len(marker_points) <= 1:
+            output[component] = next_label
+            next_label += 1
+            continue
+
+        markers = np.zeros(binary_mask.shape, dtype=np.int32)
+        for marker_id, (y, x) in enumerate(marker_points, start=1):
+            markers[y, x] = marker_id
+
+        tentative_labels = watershed(-distance, markers, mask=component)
+        min_region_area = max(40, int(component.sum() * 0.035))
+        major_regions = np.zeros(binary_mask.shape, dtype=np.int32)
+        major_count = 0
+        for label in range(1, int(tentative_labels.max()) + 1):
+            region = tentative_labels == label
+            if region.sum() < min_region_area:
+                continue
+            major_count += 1
+            major_regions[region] = major_count
+
+        if major_count <= 1:
+            output[component] = next_label
+            next_label += 1
+            continue
+
+        resolved_labels = watershed(-distance, major_regions, mask=component)
+        for label in range(1, major_count + 1):
+            region = resolved_labels == label
+            if region.sum() < 24:
+                continue
+            output[region] = next_label
+            next_label += 1
     return output
 
 
