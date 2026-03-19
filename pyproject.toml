@@ -1,0 +1,20 @@
+[project]
+name = "interview"
+version = "0.1.0"
+description = "Mars rover image tool for estimating rock heights from a single image"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fiftyone>=1.13.4",
+    "huggingface-hub>=0.20.0",
+    "numpy>=1.26",
+    "opencv-python>=4.13.0.92",
+    "opencv-python-headless>=4.10",
+    "scikit-image>=0.24.0",
+    "scipy>=1.13.1",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+]
+
+[project.scripts]
+interview = "app.cli:main"

@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.env
+.env.*
+
+# Virtual environments
+.venv
+
+# Project artifacts
+.DS_Store
+.cache/
+archive/
+data/
+inputs/
+MarsData/
+models/
+outputs/
+sample_output.png
