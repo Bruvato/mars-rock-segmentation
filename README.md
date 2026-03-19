@@ -1,83 +1,212 @@
-# Mars Rock Segmentation
+# Mars Rock Detection And Height Estimation
 
-This project trains and runs a binary rock-segmentation pipeline for Mars rover imagery.
+This repository is a small CLI project for analyzing Mars rover imagery. It segments rocks in a single image, separates individual detections, and produces heuristic per-rock size estimates, including a filtered view of rocks estimated to be taller than a chosen height threshold.
 
-The Hugging Face asset referenced in the prompt, [`Voxel51/S5Mars`](https://huggingface.co/datasets/Voxel51/S5Mars), is a dataset rather than a pretrained model. The codebase includes a `prepare-s5mars` command that downloads it through FiftyOne and converts the `rock` class into the local `img/{split}` and `label/{split}` layout that the trainer already understands.
+The repo already includes:
+
+- sample rover images in `inputs/`
+- trained checkpoints in `models/`
+- example prediction outputs in `outputs/`
+- a CLI with commands for prediction, training, and preparing the `Voxel51/S5Mars` dataset
+
+The sample rover imagery in `inputs/` is sourced from NASA's [Mars Perseverance raw image archive](https://mars.nasa.gov/mars2020/multimedia/raw-images/).
+
+## What The Project Does
+
+`mars-rocks` supports three main workflows:
+
+1. `predict`: run inference on an input image and write annotated outputs
+2. `train`: train a binary rock-segmentation model from a local dataset or directly from Hugging Face through FiftyOne
+3. `prepare-s5mars`: download and convert `Voxel51/S5Mars` into the local `img/` / `label/` layout used by training
+
+Prediction produces four artifacts by default:
+
+- an annotated overlay image
+- a binary mask
+- a JSON report with model, camera, summary, and per-rock metadata
+- a second annotated image containing only rocks above `--min-height-cm`
+
+## Example Height-Filtered Outputs
+
+These are the `v6` sample images showing only rocks estimated above the default `10 cm` threshold:
+
+Source imagery: [Mars Perseverance Raw Images](https://mars.nasa.gov/mars2020/multimedia/raw-images/)
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="outputs/v6/input1_rocks_over_10cm.png" alt="Height-filtered result for input1" />
+      <br />
+      <sub><code>input1</code></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="outputs/v6/input2_rocks_over_10cm.png" alt="Height-filtered result for input2" />
+      <br />
+      <sub><code>input2</code></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="outputs/v6/input3_rocks_over_10cm.png" alt="Height-filtered result for input3" />
+      <br />
+      <sub><code>input3</code></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="outputs/v6/input4_rocks_over_10cm.png" alt="Height-filtered result for input4" />
+      <br />
+      <sub><code>input4</code></sub>
+    </td>
+  </tr>
+</table>
 
 ## Project Layout
 
 ```text
 .
+├── main.py
 ├── pyproject.toml
 ├── README.md
 ├── src/
-│   ├── interview.py
 │   ├── cli.py
+│   ├── common.py
+│   ├── data.py
 │   ├── prediction.py
-│   └── ...
+│   ├── training.py
+│   └── mars_rocks.py
 ├── inputs/
 ├── models/
-└── outputs/
+├── outputs/
+└── tests/
 ```
 
-## Quick Start
+## Setup
 
-Install the locked environment and confirm the CLI is available:
+This project targets Python 3.9+ and uses `uv` for dependency management.
 
 ```bash
 uv sync
-uv run interview --help
+uv run mars-rocks --help
 ```
 
-## Run Inference
-
-Run inference with an existing checkpoint:
+You can also run the local bootstrap entrypoint directly:
 
 ```bash
-uv run interview predict --input inputs/input1.png --checkpoint models/s5mars_long.pt
+uv run python main.py --help
 ```
 
-The `predict` command writes four artifacts by default:
+## Run Prediction
 
-- `outputs/{stem}_annotated.png`: the standard segmentation overlay
-- `outputs/{stem}_mask.png`: the binary mask
-- `outputs/{stem}.json`: per-rock metadata, including heuristic height estimates
-- `outputs/{stem}_rocks_over_10cm.png`: a separate outline-and-label image for rocks whose estimated height exceeds `--min-height-cm`
-
-You can improve the single-image height heuristic when camera metadata is known:
+The repository ships several checkpoints under `models/`. Passing one explicitly is the safest way to get started:
 
 ```bash
-uv run interview predict \
+uv run mars-rocks predict \
   --input inputs/input1.png \
-  --checkpoint models/s5mars_long.pt \
+  --checkpoint models/s5mars_long_v2.pt
+```
+
+For `inputs/input1.png`, the command writes default outputs like:
+
+- `outputs/input1_annotated.png`
+- `outputs/input1_mask.png`
+- `outputs/input1.json`
+- `outputs/input1_rocks_over_10cm.png`
+
+The JSON output includes:
+
+- model checkpoint metadata
+- resolved camera parameters
+- segmentation totals
+- per-rock bounding boxes, confidence, contour points, and estimated size fields
+
+If camera metadata is known, height estimates become more grounded:
+
+```bash
+uv run mars-rocks predict \
+  --input inputs/input1.png \
+  --checkpoint models/s5mars_long_v2.pt \
   --camera-height-m 1.8 \
   --vfov-deg 45 \
   --pitch-deg 32 \
   --min-height-cm 10
 ```
 
-If you prefer the module form, this is equivalent:
+If `--pitch-deg` is omitted, the predictor will try to infer pitch from the image horizon and otherwise fall back to defaults.
 
-```bash
-uv run python -m interview predict --input inputs/input1.png --checkpoint models/s5mars_long.pt
+## Train A Model
+
+Training expects a dataset root with this structure:
+
+```text
+DATASET_ROOT/
+├── img/
+│   ├── train/
+│   └── val/
+└── label/
+    ├── train/
+    └── val/
 ```
 
-## Training
-
-Train on the existing local dataset:
+Example local training run:
 
 ```bash
-uv run interview train --dataset-root MarsData
+uv run mars-rocks train \
+  --dataset-root MarsData \
+  --output-checkpoint models/mars_rock_lraspp.pt
 ```
 
-Prepare `S5Mars` from Hugging Face and train on it:
+The trainer supports both `deeplabv3_mobilenet_v3_large` and `lraspp_mobilenet_v3_large`:
 
 ```bash
-uv run interview prepare-s5mars --output-root data/s5mars_rock
-uv run interview train --dataset-root data/s5mars_rock --target-class rock --image-size 512
+uv run mars-rocks train \
+  --dataset-root MarsData \
+  --model-arch deeplabv3_mobilenet_v3_large \
+  --epochs 8 \
+  --image-size 512 \
+  --crop-size 512
 ```
 
-## Commands
+## Use S5Mars
 
-- `predict`: run the binary rock detector and write an annotated image, binary mask, JSON payload, and a separate `>10 cm` outline image
-- `train`: train the segmenter on a local `img/` and `label/` dataset root
+`Voxel51/S5Mars` is a dataset, not a pretrained model. This project can either train from it directly through FiftyOne or convert it into the local on-disk layout first.
+
+Prepare a local export:
+
+```bash
+uv run mars-rocks prepare-s5mars \
+  --output-root data/s5mars_rock \
+  --target-class rock
+```
+
+Then train on the converted dataset:
+
+```bash
+uv run mars-rocks train \
+  --dataset-root data/s5mars_rock \
+  --target-class rock \
+  --image-size 512
+```
+
+Or train straight from Hugging Face:
+
+```bash
+uv run mars-rocks train \
+  --hf-repo-id Voxel51/S5Mars \
+  --target-class rock \
+  --hf-max-samples 2000
+```
+
+If the dataset requires authentication, set `HF_TOKEN` in your environment or a local `.env` file.
+
+## Notes On Labels And Variants
+
+- Local labels can be binary masks or class-id masks.
+- For S5Mars, the positive foreground class is configurable through `--target-class` and defaults to `rock`.
+- Legacy MarsData variant filtering is supported through `--variants`.
+
+## Development
+
+Run the unit tests with:
+
+```bash
+uv run python -m unittest
+```

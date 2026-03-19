@@ -17,7 +17,7 @@ def bootstrap_local_layout(project_root: Path) -> None:
 
 bootstrap_local_layout(Path(__file__).resolve().parent)
 
-from interview import main
+from mars_rocks import main
 
 
 if __name__ == "__main__":

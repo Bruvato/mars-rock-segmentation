@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "interview"
+name = "mars-rocks"
 version = "0.1.0"
 description = "Mars rover image tool for estimating rock heights from a single image"
 readme = "README.md"
@@ -21,8 +21,8 @@ dependencies = [
 ]
 
 [project.scripts]
-interview = "interview:main"
+mars-rocks = "mars_rocks:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["interview", "cli", "common", "data", "deps", "prediction", "training"]
+py-modules = ["mars_rocks", "cli", "common", "data", "deps", "prediction", "training"]
